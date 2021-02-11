@@ -1,0 +1,40 @@
+try{
+
+window.TMSDataLayer = window.TMSDataLayer || {};
+//check if object exists
+  
+  TMSDataLayer.setDataLayer = function(application){
+    window.dataLayer = window.dataLayer || {};
+
+    //set environment
+    dataLayer.pageInfo.environment = _satellite.buildInfo.environment;
+    dataLayer.pageInfo.externalReferrer = document.referrer
+
+    var time = new Date(_satellite.buildInfo.buildDate);
+    
+    TMSHelper.console('===================>[Launch Build]: ' + time);
+    TMSHelper.console('===================>[Applikation]: ' + application); 
+    TMSHelper.console('===================>[Environment]: ' + _satellite.buildInfo.environment);
+ 
+    //set version object
+    dataLayer.version = {
+      versionInfo : {
+        datalayer: "css_dataLayer_v1.0",                                 //reference to solution design reference
+        appmeasurement: "2.17.0",                                       //reference to appmeasurement version
+        launch: _satellite.buildInfo.turbineVersion,                     //reference to launch version
+        buildInfo: _satellite.buildInfo                                  //reference to buildVersion
+    }
+}
+
+//set data environment
+if(document.location.href.indexOf('%INSERT LIVE ULR%') > -1){
+  dataLayer.version.versionInfo.dataEnvironment = 'live';
+}
+else{
+  dataLayer.version.versionInfo.dataEnvironment = 'test';
+}
+}
+}
+catch(err){
+  TMSHelper.console('TMS Fehler: ' + err);
+}
