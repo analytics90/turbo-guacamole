@@ -1,0 +1,175 @@
+			
+	TMSHelper.console("===================>[VAST] START");
+	TMSHelper.console("[VAST] event call detected");
+
+	if(event.target.id !== undefined && event.target.id.indexOf('Cookiebot') >= 0 ){
+		TMSHelper.console("[VAST] Cookiebot Interaction");
+		TMSHelper.console("[VAST] No Event triggered");
+        TMSHelper.console("===================>[VAST] END");
+	}
+	else{
+	if(event.target.dataset.eventCategory === undefined && event.target.parentElement.dataset.eventCategory === undefined && event.target.parentElement.parentElement.dataset.eventCategory === undefined ){
+		
+	//check Parent Nodes	
+	if (event.target !== "") {
+                        var parentNodeCounter = 0;
+                        while (parentNodeCounter <= 5) {
+                            if (TMSHelper.findParentNode(event.target)[parentNodeCounter].localName == "body") {
+                                break;
+                            }
+                          else if (event.target.localName == "a"){
+                          event_attributes_tgtURL = event.target.href;
+                            break;
+                          }
+                          else if (TMSHelper.findParentNode(event.target)[parentNodeCounter].localName = "a" && TMSHelper.findParentNode(event.target)[parentNodeCounter].href !== undefined) {
+                                event_attributes_tgtURL = TMSHelper.findParentNode(event.target)[parentNodeCounter].href;
+                                break;
+                            } else {
+                                event_attributes_tgtURL = "";
+                                parentNodeCounter++;
+                            }
+                        }
+						
+	
+	  //Slash Event Target Parts
+	  TMSHelper.URLslasher('target',event_attributes_tgtURL);
+      //check if it is an onsitelink
+      if(TMSHelper.isOnsiteLink(slashedURLObject.event_attributes_tgtHostname) === false || TMSHelper.isDownloadLink(slashedURLObject.event_attributes_tgtPath) == true){
+
+		// 1.2 set standard event flags (based on target URL)
+		TMSHelper.console("[VAST] Set Standard Event Flags start...");
+
+		// 1.2.2 set flag for 'Download' case
+		var isDownload = TMSHelper.isDownloadLink(event_attributes_tgtURL);
+		var event_attributes_isDownload = isDownload.toString();
+		TMSHelper.console("[VAST] Set Download Link flag to = " + isDownload.toString());
+
+		// 1.2.3 set flag for 'Mailto' case
+		var isMailto = TMSHelper.isEmailLink(event_attributes_tgtURL);
+		var event_attributes_isMailto = isMailto.toString();
+		TMSHelper.console("[VAST] Set Mailto Link flag to = " + isMailto.toString());
+		
+		// 1.2.4 set flag for 'OnSite' case
+		var isOnsite = TMSHelper.isOnsiteLink(slashedURLObject.event_attributes_tgtHostname); 
+		var event_attributes_isOnsite = isOnsite.toString();
+		TMSHelper.console("[VAST] Set Onsite Event flag to = " + isOnsite.toString());
+
+		// 1.2.5 set flag for 'Phone' case
+		var isPhone = TMSHelper.isPhoneLink(event_attributes_tgtURL);
+		var event_attributes_isPhone = isPhone.toString();
+		TMSHelper.console("[VAST] Set Phone Link flag to = " + isPhone.toString());
+        
+        // 1.2.6 set flag for 'Social' case
+		var isSocial = TMSHelper.isSocialLink(event_attributes_tgtURL);
+		var event_attributes_isSocial = isSocial.toString();
+		TMSHelper.console("[VAST] Set Social Link flag to = " + isSocial.toString());
+		
+		TMSHelper.console("[VAST] Set Standard Event Flags complete");
+
+		TMSHelper.console("[VAST] Create Standard Event Variables start...");
+
+		// 1.3.1 define event variables
+		var category,action,effect
+
+		// 1.3.2 set default values for event variables
+
+		// set default values for event category, action and label 
+		category = "category"; // default event category
+		action = "action"; // default event action
+		label = "label"; //default event label
+
+		// 1.3.4 set variables for 'Offsite' case
+		// check flag (N.B. condition is FALSE as we are looking for OFFSITE events)
+		if (event_attributes_isOnsite.toLowerCase() === "false") {
+			// set associated variables
+			category = "Link Tracking";
+			action = "Offsite";
+			label = slashedURLObject['event_attributes_tgtHostname'] + slashedURLObject['event_attributes_tgtPath'];
+			TMSHelper.console("[VAST] Standard Event 'Offsite' values set");
+		}
+
+		// 1.3.5 set variables for 'Download' case
+		// check flag
+		if (event_attributes_isDownload.toLowerCase() === "true") {
+			// set associated variables
+			category = "User Interaktion";
+			action = "Download";
+			label = event.target.download;
+			TMSHelper.console("[VAST] Standard Event 'Download' values set");
+		}
+
+		// 1.3.5 set variables for 'Mailto' case
+		// check flag
+		if (event_attributes_isMailto.toLowerCase() === "true") {
+			// set associated variables
+			category = "Link Tracking";
+			action = "Mail";
+			if(event.target.href == undefined){
+            label = event_attributes_tgtURL.substr(7);
+            }
+          else{
+			label= event.target.href.substr(7);
+            }
+			TMSHelper.console("[VAST] Standard Event 'Mailto' values set");
+		}
+
+		// 1.3.6 set variables for 'Phone' case
+		// check flag
+		if (event_attributes_isPhone.toLowerCase() === "true") {
+			// set associated variables
+			category = "Link Tracking";
+			action = "Phone";
+         
+            var index = event_attributes_tgtURL.search(':')
+            index = index+1;
+            label = event_attributes_tgtURL.substring(index,event_attributes_tgtURL.length);
+            
+			TMSHelper.console("[VAST] Standard Event 'Phone' values set");
+		}
+        
+        // 1.3.5 set variables for 'Social' case
+		// check flag
+		if (event_attributes_isSocial.toLowerCase() === "true") {
+			// set associated variables
+			category = "Link Tracking";
+          if(slashedURLObject["event_attributes_tgtPath"].indexOf('share') > -1){
+			action = "Social Share";
+          }
+          else{
+            action = "Social Follow";
+          }
+			label = slashedURLObject['event_attributes_tgtHostname'];
+			TMSHelper.console("[VAST] Standard Event 'Social' values set");
+		}
+
+		// 1.3.7 return final vars in object
+		standardEventVarsObject = {
+			"event_attributes_category": category,
+			"event_attributes_action": action,
+			"event_eventInfo_label": label
+		};
+		TMSHelper.console("[VAST] Create Standard Event Variables complete");
+        TMSHelper.console("[VAST] Event triggered");
+        TMSHelper.console("===================>[VAST] END");
+      return true;
+	  }
+	 else{
+		TMSHelper.console("[VAST] Onsite Link triggered");
+       TMSHelper.console("[VAST] No Event triggered");
+        TMSHelper.console("===================>[VAST] END");
+	 }
+
+	}
+	 else {
+		TMSHelper.console("[VAST] No 'event_attributes_tgtURL' found");
+       TMSHelper.console("[VAST] No Event triggered");
+        TMSHelper.console("===================>[VAST] END");
+       return false;
+	}
+	}
+	else{
+		TMSHelper.console("[VAST] Data Attribute is set by developer");
+      TMSHelper.console("[VAST] No Event triggered");
+        TMSHelper.console("===================>[VAST] END");
+	}
+	}
