@@ -1,0 +1,21 @@
+try{
+//check if href is defined
+  TMSHelper.console("===================>[Global Event Tracker] START");
+  TMSHelper.console("[Global Event Tracker] event call detected");
+if(event.target.href != undefined || event.element.href != undefined){
+    //check if url is valid
+    var event_attributes_tgtURL = TMSHelper.URLconstructor(event.element.href);
+    //slash into URL parts
+    TMSHelper.URLslasher('target',event_attributes_tgtURL);
+    TMSHelper.console("[Global Event Tracker] Target Attributes generated");
+    return true;
+  } 
+  else{
+    TMSHelper.console("===================>[Global Event Tracker] END")
+    return false;
+  }
+}
+catch(err){
+  TMSHelper.console('TMS Fehler: ' + err)
+  return false;
+}
