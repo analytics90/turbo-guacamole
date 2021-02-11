@@ -1,0 +1,51 @@
+//create TMSHelper
+window.TMSValidation = window.TMSValidation || {};
+
+// console: logs to the console if the dev console exists
+  TMSValidation.checkTags = function()
+    {
+     //Validation of Network Requests in Google Chrome
+
+//define resources
+var resourceList = window.performance.getEntriesByType("resource");
+var resultset = [];
+
+//define object
+var objPartner = {
+
+ floodlight : "activity",
+ facebook : "facebook",
+ googleanalytics : "collect",
+ adobetarget : "delivery",
+ adobeanalytics : "smetrics",
+ adwords : "random"
+}
+
+//loop through resources
+for (i = 0; i < resourceList.length; i++)
+{
+	for (ii = 0; ii < 6; ii++)
+
+	{
+           {
+              if (resourceList[i].name.indexOf(Object.values(objPartner)[ii]) > -1)
+              {
+                resultset.push(Object.keys(objPartner)[ii])
+                 console.log('Erfolgreich versendet: ' + resourceList[i].name + ' ' + Object.keys(objPartner)[ii]);
+              }
+		   }
+	}
+}
+    };
+
+TMSValidation.validateVars = function(eVarArray,aaObject){
+  
+    var i;
+    for (i = 0; i < eVarArray.length; i++) {
+      if(eVarArray[i] == undefined || null){
+      s.eVar115 = false
+      TMSHelper.console('TMS Validierungsfehler: ' + eVarArray[i] + ' nicht vorhanden')
+      }
+    }
+  
+}
